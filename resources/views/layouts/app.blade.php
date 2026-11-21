@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +40,7 @@
         nav a {
             padding: 9px 12px;
             color: #eeeeee;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
             text-decoration: none;
         }
@@ -65,6 +65,68 @@
             background: transparent;
         }
 
+        nav .account-menu {
+            position: relative;
+        }
+
+        nav .account-menu summary {
+            padding: 9px 12px;
+            color: var(--white);
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        nav .account-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        nav .account-menu summary:hover,
+        nav .account-menu[open] summary {
+            color: var(--black);
+            background: var(--white);
+        }
+
+        nav .account-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            z-index: 10;
+            min-width: 170px;
+            padding: 6px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        nav .account-dropdown a,
+        nav .account-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 9px 10px;
+            color: var(--text);
+            background: transparent;
+            border: 0;
+            border-radius: 5px;
+            font: inherit;
+            font-size: 14px;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        nav .account-dropdown a:hover,
+        nav .account-dropdown button:hover {
+            color: var(--text);
+            background: var(--background);
+        }
+
+        nav .account-dropdown form {
+            margin: 0;
+        }
+
         main {
             width: min(980px, 88%);
             min-height: calc(100vh - 105px);
@@ -86,7 +148,7 @@
             padding: 22px 24px;
             background: var(--white);
             border-left: 3px solid var(--black);
-            border-radius: 5px;
+            border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
@@ -123,7 +185,7 @@
             color: var(--white);
             background: var(--black);
             border: 1px solid var(--black);
-            border-radius: 4px;
+            border-radius: 7px;
             font-size: 14px;
             text-decoration: none;
             cursor: pointer;
@@ -150,7 +212,7 @@
             padding: 16px;
             background: var(--white);
             border: 1px solid #eeeeee;
-            border-radius: 5px;
+            border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
@@ -173,7 +235,7 @@
             overflow-x: auto;
             background: var(--white);
             border: 1px solid #e6e6e6;
-            border-radius: 6px;
+            border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
@@ -190,7 +252,7 @@
             color: #404040;
             background: #eeeeee;
             border-left: 3px solid var(--black);
-            border-radius: 3px;
+            border-radius: 6px;
             font-size: 13px;
         }
 
@@ -258,7 +320,7 @@
             color: var(--text);
             background: var(--white);
             border: 1px solid #cccccc;
-            border-radius: 4px;
+            border-radius: 7px;
             font: inherit;
             font-size: 15px;
         }
@@ -298,7 +360,7 @@
             color: #17663a;
             background: #e9f7ef;
             border: 1px solid #b8e3c8;
-            border-radius: 4px;
+            border-radius: 7px;
             font-size: 14px;
         }
 
@@ -363,15 +425,35 @@
             About
         </a>
 
-        <a href="{{ route('customers.index') }}"
-           class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
-            Customers
-        </a>
+        @auth
+            <a href="{{ route('customers.index') }}"
+               class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
+                Customers
+            </a>
 
-        <a href="{{ route('users.index') }}"
-           class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
-            Users
-        </a>
+            <a href="{{ route('users.index') }}"
+               class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
+                Users
+            </a>
+
+            <details class="account-menu">
+                <summary>
+                    {{ Auth::user()->full_name ?? Auth::user()->username }} ▾
+                </summary>
+
+                <div class="account-dropdown">
+                    <a href="{{ route('profile.edit') }}">Profile</a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit">Log out</button>
+                    </form>
+                </div>
+            </details>
+        @else
+            <a href="{{ route('login') }}">Log in</a>
+            <a href="{{ route('register') }}">Register</a>
+        @endauth
     </nav>
 
     <main>

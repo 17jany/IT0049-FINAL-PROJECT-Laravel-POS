@@ -2,41 +2,35 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PageController::class, 'home'])
-    ->name('home');
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/about', [PageController::class, 'about'])->name('about');
 
-Route::get('/about', [PageController::class, 'about'])
-    ->name('about');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware('auth')->name('dashboard');
 
-Route::get('/customers', [CustomerController::class, 'index'])
-    ->name('customers.index');
+Route::middleware('auth')->group(function () {
+    Route::resource('customers', CustomerController::class)
+        ->except(['show', 'destroy']);
 
-Route::get('/customers/create', [CustomerController::class, 'create'])
-    ->name('customers.create');
+    Route::resource('users', UserController::class)
+        ->except(['show', 'destroy']);
 
-Route::post('/customers', [CustomerController::class, 'store'])
-    ->name('customers.store');
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
 
-Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
-    ->name('customers.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-Route::put('/customers/{customer}', [CustomerController::class, 'update'])
-    ->name('customers.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+    
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password.update');
+});
 
-Route::get('/users', [UserController::class, 'index'])
-    ->name('users.index');
-
-Route::get('/users/create', [UserController::class, 'create'])
-    ->name('users.create');
-
-Route::post('/users', [UserController::class, 'store'])
-    ->name('users.store');
-
-Route::get('/users/{user}/edit', [UserController::class, 'edit'])
-    ->name('users.edit');
-
-Route::put('/users/{user}', [UserController::class, 'update'])
-    ->name('users.update');
+require __DIR__.'/auth.php';

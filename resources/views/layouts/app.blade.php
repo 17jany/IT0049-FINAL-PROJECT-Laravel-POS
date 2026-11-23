@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'Simple POS') | Simple POS</title>
+    <title>@yield('title', 'Sukli POS') | Sukli POS</title>
 
     <style>
         * {
@@ -12,12 +12,14 @@
         }
 
         :root {
-            --black: #171717;
+            --black: #17191c;
             --background: #f1f2f5;
             --white: #ffffff;
             --text: #252525;
-            --muted: #626262;
+            --muted: #626b75;
             --border: #e3e3e3;
+            --blue: #1769c2;
+            --blue-hover: #1057a4;
         }
 
         body {
@@ -28,81 +30,104 @@
             font-size: 16px;
         }
 
-        nav {
+        .site-nav {
             display: flex;
             align-items: center;
             gap: 8px;
-            min-height: 52px;
-            padding: 0 max(5%, calc((100% - 1100px) / 2));
+            min-height: 58px;
+            padding: 0 max(4%, calc((100% - 1200px) / 2));
             background: var(--black);
         }
 
-        nav a {
+        .site-nav .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: auto;
+            padding: 8px 0;
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav .brand svg {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 auto;
+        }
+
+        .site-nav .brand-name::after {
+            content: "";
+            display: block;
+            width: 48px;
+            height: 3px;
+            margin-top: 2px;
+            background: #f2c94c;
+            border-radius: 4px;
+        }
+
+        .site-nav .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .site-nav .nav-link,
+        .site-nav .account-menu summary {
+            display: block;
             padding: 9px 12px;
             color: #eeeeee;
+            border: 0;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             text-decoration: none;
-        }
-
-        nav a:hover,
-        nav a.active {
-            color: var(--black);
-            background: var(--white);
-        }
-
-        nav .brand {
-            margin-right: auto;
-            padding-left: 0;
-            color: var(--white);
-            font-size: 15px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        nav .brand:hover {
-            color: var(--white);
-            background: transparent;
-        }
-
-        nav .account-menu {
-            position: relative;
-        }
-
-        nav .account-menu summary {
-            padding: 9px 12px;
-            color: var(--white);
-            border-radius: 6px;
-            font-size: 14px;
+            white-space: nowrap;
             cursor: pointer;
+        }
+
+        .site-nav .nav-link:hover,
+        .site-nav .nav-link.active {
+            color: var(--white);
+            background: var(--blue);
+        }
+
+        .site-nav .account-menu {
+            position: relative;
+            margin-left: 8px;
+        }
+
+        .site-nav .account-menu summary {
             list-style: none;
         }
 
-        nav .account-menu summary::-webkit-details-marker {
+        .site-nav .account-menu summary::-webkit-details-marker {
             display: none;
         }
 
-        nav .account-menu summary:hover,
-        nav .account-menu[open] summary {
-            color: var(--black);
-            background: var(--white);
+        .site-nav .account-menu summary:hover,
+        .site-nav .account-menu[open] summary {
+            color: var(--white);
+            background: #30343a;
         }
 
-        nav .account-dropdown {
+        .site-nav .account-dropdown {
             position: absolute;
-            top: calc(100% + 8px);
+            top: calc(100% + 6px);
             right: 0;
             z-index: 10;
             min-width: 170px;
             padding: 6px;
             background: var(--white);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 7px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        nav .account-dropdown a,
-        nav .account-dropdown button {
+        .site-nav .account-dropdown a,
+        .site-nav .account-dropdown button {
             display: block;
             width: 100%;
             padding: 9px 10px;
@@ -111,26 +136,25 @@
             border: 0;
             border-radius: 5px;
             font: inherit;
-            font-size: 14px;
+            font-size: 13px;
             text-align: left;
             text-decoration: none;
             cursor: pointer;
         }
 
-        nav .account-dropdown a:hover,
-        nav .account-dropdown button:hover {
-            color: var(--text);
+        .site-nav .account-dropdown a:hover,
+        .site-nav .account-dropdown button:hover {
             background: var(--background);
         }
 
-        nav .account-dropdown form {
+        .site-nav .account-dropdown form {
             margin: 0;
         }
 
         main {
-            width: min(980px, 88%);
-            min-height: calc(100vh - 105px);
-            margin: 24px auto;
+            width: min(1100px, 92%);
+            min-height: calc(100vh - 110px);
+            margin: 22px auto;
         }
 
         h1,
@@ -372,15 +396,20 @@
         }
 
         @media (max-width: 650px) {
-            nav {
+            .site-nav {
                 flex-wrap: wrap;
-                gap: 2px;
+                gap: 4px;
                 padding: 8px 4%;
             }
 
-            nav .brand {
+            .site-nav .nav-links {
+                order: 3;
                 width: 100%;
-                margin-bottom: 4px;
+                overflow-x: auto;
+            }
+
+            .site-nav .account-menu {
+                margin-left: 0;
             }
 
             main {
@@ -412,37 +441,75 @@
 </head>
 
 <body>
-    <nav>
-        <a class="brand" href="{{ route('home') }}">SIMPLE POS</a>
-
-        <a href="{{ route('home') }}"
-           class="{{ request()->routeIs('home') ? 'active' : '' }}">
-            Home
-        </a>
-
-        <a href="{{ route('about') }}"
-           class="{{ request()->routeIs('about') ? 'active' : '' }}">
-            About
+    <nav class="site-nav">
+        <a
+            class="brand"
+            href="{{ auth()->check() ? route('dashboard') : route('home') }}"
+            aria-label="Sukli POS"
+        >
+            <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                <path d="M7 19h34l-4-11H11L7 19Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M10 19v21h28V19M18 40V28h12v12" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M16 8v8m8-8v8m8-8v8" stroke="currentColor" stroke-width="2.5"/>
+            </svg>
+            <span class="brand-name">SUKLI POS</span>
         </a>
 
         @auth
-            <a href="{{ route('customers.index') }}"
-               class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
-                Customers
-            </a>
+            <div class="nav-links">
+                <a
+                    class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                    href="{{ route('dashboard') }}"
+                >
+                    Dashboard
+                </a>
 
-            <a href="{{ route('users.index') }}"
-               class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
-                Users
-            </a>
+                @if (\Illuminate\Support\Facades\Route::has('sales.index'))
+                    <a
+                        class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}"
+                        href="{{ route('sales.index') }}"
+                    >
+                        Sales History
+                    </a>
+                @endif
+
+                @if (\Illuminate\Support\Facades\Route::has('products.index'))
+                    <a
+                        class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                        href="{{ route('products.index') }}"
+                    >
+                        Products
+                    </a>
+                @endif
+
+                @if (\Illuminate\Support\Facades\Route::has('customers.index'))
+                    <a
+                        class="nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}"
+                        href="{{ route('customers.index') }}"
+                    >
+                        Customers
+                    </a>
+                @endif
+
+                @if (\Illuminate\Support\Facades\Route::has('users.index'))
+                    <a
+                        class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}"
+                        href="{{ route('users.index') }}"
+                    >
+                        Staff
+                    </a>
+                @endif
+            </div>
 
             <details class="account-menu">
                 <summary>
-                    {{ Auth::user()->full_name ?? Auth::user()->username }} ▾
+                    {{ Auth::user()->full_name ?? Auth::user()->username ?? Auth::user()->name ?? 'Account' }} ▾
                 </summary>
 
                 <div class="account-dropdown">
-                    <a href="{{ route('profile.edit') }}">Profile</a>
+                    @if (\Illuminate\Support\Facades\Route::has('profile.edit'))
+                        <a href="{{ route('profile.edit') }}">My Profile</a>
+                    @endif
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -451,8 +518,13 @@
                 </div>
             </details>
         @else
-            <a href="{{ route('login') }}">Log in</a>
-            <a href="{{ route('register') }}">Register</a>
+            <div class="nav-links">
+                <a class="nav-link" href="{{ route('login') }}">Log in</a>
+
+                @if (\Illuminate\Support\Facades\Route::has('register'))
+                    <a class="nav-link" href="{{ route('register') }}">Register</a>
+                @endif
+            </div>
         @endauth
     </nav>
 
@@ -461,7 +533,7 @@
     </main>
 
     <footer>
-        Simple POS
+        Sukli POS
     </footer>
 </body>
 </html>

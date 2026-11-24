@@ -1,38 +1,96 @@
-# Laravel POS Customer and User Management
+# Sukli POS — Laravel Point-of-Sale System
 
-> A Laravel POS application for managing customer and user accounts. It includes forms for creating and editing records, validation, and profile avatar uploads for users.
+> A Laravel-based Point-of-Sale system for managing products, customers, staff accounts, inventory, and sales transactions.
 
 ## Features
 
-- **Home (`/`)** — introduces the POS application and links to its main sections.
-- **About (`/about`)** — describes the project.
-- **Customer Accounts (`/customers`)** — displays customer records.
-- **Create Customer (`/customers/create`)** — adds a customer after validating the required full name and valid email address.
-- **Edit Customer (`/customers/{customer}/edit`)** — displays existing customer details and updates the record when submitted.
-- **User Accounts (`/users`)** — displays staff accounts, avatars, and a placeholder for users without an avatar.
-- **Create User (`/users/create`)** — adds a user after validating the required username, username uniqueness, and full name.
-- **Edit User (`/users/{user}/edit`)** — displays existing user details and allows an optional avatar upload.
-- **Avatar processing** — validates uploaded images, prepares a display-ready image with Intervention Image, and stores it on Laravel's public disk.
+- **Home (`/`)** — redirects guests to login and authenticated staff to the dashboard.
+- **About (`/about`)** — displays information about the system.
+- **Authentication** — staff login, registration, logout, and protected management pages.
+- **Dashboard (`/dashboard`)** — displays store overview, sales summary, transactions, products, and low-stock information.
+
+### Product Management
+
+- **Products (`/products`)** — lists active products and supports searching.
+- **Create Product (`/products/create`)** — adds a product with name, category, description, price, stock quantity, and optional image.
+- **Edit Product (`/products/{product}/edit`)** — updates product details and replaces the product image.
+- **Archive Product** — removes products from the active list while preserving records.
+- **Product Images** — uploaded images are stored on Laravel's public storage disk.
+
+### Customer Management
+
+- **Customers (`/customers`)** — lists active customers and supports searching by name, phone, or email.
+- **Create Customer (`/customers/create`)** — adds a customer with validated information.
+- **Edit Customer (`/customers/{customer}/edit`)** — updates customer information and credit settings.
+- **Archive Customer** — hides a customer from the active list.
+- **Restore Customer** — restores an archived customer.
+- **Delete Customer** — permanently deletes an archived customer only when there is no sales history.
+- **Customer Status** — displays whether a customer is a first-time customer or a returning Suki customer based on recorded sales.
+
+### Staff Management
+
+- **Staff Accounts (`/users`)** — displays staff accounts, usernames, names, and avatars.
+- **Create Staff (`/users/create`)** — creates a staff account with a unique username and hashed password.
+- **Edit Staff (`/users/{user}/edit`)** — updates staff information, password, and avatar.
+- **Delete Staff** — deletes a staff account, except for the currently logged-in account.
+- **Avatar Uploads** — uploaded avatars are validated and stored on Laravel's public storage disk.
+- **Avatar Placeholder** — staff without an avatar are shown a default placeholder image.
+
+### Sales and Inventory
+
+- **Record Sale (`/sales/create`)** — records a transaction with one or more products.
+- **Optional Customer** — a sale may be recorded with or without an assigned customer.
+- **Cash Payment** — calculates the total amount, cash received, and change.
+- **Stock Deduction** — product stock automatically decreases after a successful sale.
+- **Stock Validation** — sales are rejected when the requested quantity exceeds available stock.
+- **Transaction Safety** — sales and stock updates are processed inside a database transaction.
+
+### Sales History
+
+- **Sales History (`/sales`)** — displays previous transactions.
+- **Transaction Details (`/sales/{sale}`)** — shows products, customer, staff member, quantities, totals, and payment details.
+- **Sales Filters** — filters sales by date, customer, and staff member.
+- **CSV Export (`/sales/export`)** — exports sales history as a CSV file.
+- **PDF Receipt (`/sales/{sale}/receipt`)** — downloads a printable PDF receipt.
+
+### Profile and Account Security
+
+- **Profile (`/profile`)** — updates the logged-in staff member's name, username, and email.
+- **Change Password (`/profile/password`)** — changes the current password after validating the existing password.
+- **Account Protection** — management pages are available only to authenticated staff members.
 
 ## Requirements
 
 - PHP 8.2 or later
 - Composer
-- Laravel dependencies
-- SQLite, or another database configured in `.env`
-- PHP GD extension for image processing
+- Node.js and npm
+- Laravel 12
+- MySQL or SQLite
+- PHP extensions required by Laravel and the selected database driver
+- PHP GD extension if image-processing features are enabled
 
 ## Installation and Setup
 
-1. **Open the project folder** in a terminal.
+1. **Clone the repository:**
 
-2. **Install dependencies:**
+   ```bash
+   git clone https://github.com/17jany/IT0049-FINAL-PROJECT-Laravel-POS.git
+   cd IT0049-FINAL-PROJECT-Laravel-POS
+   ```
+
+2. **Install PHP dependencies:**
 
    ```bash
    composer install
    ```
 
-3. **Create the environment file if it does not exist.**
+3. **Install frontend dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+4. **Create the environment file if it does not exist.**
 
    Windows PowerShell:
 
@@ -46,77 +104,164 @@
    cp .env.example .env
    ```
 
-4. **Generate the application key:**
+5. **Generate the application key:**
 
    ```bash
    php artisan key:generate
    ```
 
-5. **Configure the database** in `.env`. For SQLite, set:
+6. **Configure the database in `.env`.**
+
+   Example for MySQL:
+
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=laravel_pos
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+   Example for SQLite:
 
    ```env
    DB_CONNECTION=sqlite
    DB_DATABASE=database/database.sqlite
    ```
 
-   Make sure the SQLite database file exists before running migrations.
-
-6. **Create the database tables:**
+7. **Run the database migrations:**
 
    ```bash
    php artisan migrate
    ```
 
-7. **Create the public storage link** for uploaded avatars:
+8. **Create the public storage link:**
 
    ```bash
    php artisan storage:link
    ```
 
-8. **Start the local server:**
+   If Laravel reports that the link already exists, it is already configured.
+
+9. **Start the Laravel server:**
 
    ```bash
    php artisan serve
    ```
 
-9. **Open the application** at the URL shown in the terminal, usually `http://127.0.0.1:8000`.
+10. **Start Vite in another terminal:**
+
+   ```bash
+   npm run dev
+   ```
+
+11. **Open the application:**
+
+   ```text
+   http://127.0.0.1:8000
+   ```
 
 ## Application Pages
 
 | URL | Page |
 |---|---|
-| `/` | Home |
-| `/about` | About |
-| `/customers` | Customer Accounts |
-| `/customers/create` | Create Customer |
-| `/customers/{customer}/edit` | Edit Customer |
-| `/users` | User Accounts |
-| `/users/create` | Create User |
-| `/users/{user}/edit` | Edit User |
+| `/` | Home and authentication redirect |
+| `/about` | About page |
+| `/login` | Staff login |
+| `/register` | Staff registration |
+| `/dashboard` | POS dashboard |
+| `/products` | Product list |
+| `/products/create` | Create product |
+| `/products/{product}/edit` | Edit product |
+| `/customers` | Customer list |
+| `/customers/create` | Create customer |
+| `/customers/{customer}/edit` | Edit customer |
+| `/users` | Staff accounts |
+| `/users/create` | Create staff account |
+| `/users/{user}/edit` | Edit staff account |
+| `/sales` | Sales history |
+| `/sales/create` | Record a sale |
+| `/sales/{sale}` | Transaction details |
+| `/profile` | Edit profile |
+| `/profile/password` | Change password |
+
+All management pages are protected by Laravel's `auth` middleware.
 
 ## Database Tables
 
-### `customers`
-
-Stores customer names, email addresses, phone numbers, and timestamps. A customer's full name and valid email address are required. The phone number is optional.
-
 ### `users`
 
-Stores usernames, full names, email addresses, avatar paths, and timestamps. Usernames must be unique. The avatar column stores the path of the prepared image; the image itself is stored on the public disk.
+Stores staff usernames, full names, email addresses, hashed passwords, avatar paths, and timestamps. Usernames are unique.
 
-## Avatar Upload
+### `customers`
 
-The user edit form accepts an optional image no larger than 2 MB. Intervention Image prepares the uploaded image for display. Laravel stores the prepared image on the public disk, and the application saves its path in the `avatar` column.
+Stores customer names, email addresses, phone numbers, customer types, credit limits, balances, archive status, and timestamps.
 
-Users without an uploaded avatar are shown a placeholder image.
+### `products`
 
-## Screenshots
+Stores product names, categories, descriptions, prices, stock quantities, image paths, archive status, and timestamps.
 
-Add screenshots here if required for submission. Suggested screenshots include:
+### `sales`
 
-- Customer and user forms
-- Validation errors
-- Customer and user listings
-- Edit forms with pre-filled information
-- Avatar upload and the resulting user listing
-- Avatar migration and migration status
+Stores the customer assigned to a transaction, the staff member who recorded it, total amount, payment method, cash received, change, and timestamps.
+
+### `sale_items`
+
+Stores the products included in each transaction, including quantity, unit price, subtotal, and timestamps.
+
+The project uses a normalized sales design where one sale can contain multiple sale items.
+
+## Database Relationships
+
+- A customer can have many sales.
+- A staff user can record many sales.
+- A sale can contain many sale items.
+- Each sale item belongs to one product.
+- Product stock is reduced when a sale is successfully recorded.
+- Customer and product archive status preserves historical records.
+
+## Image Uploads
+
+Product and staff avatar uploads are validated as image files and stored using Laravel's public storage disk.
+
+Uploaded files are stored under:
+
+```text
+storage/app/public/products
+storage/app/public/avatars
+```
+
+They are displayed through the public storage link:
+
+```blade
+asset('storage/' . $filePath)
+```
+
+Staff members without an uploaded avatar use the default placeholder image.
+
+## Useful Commands
+
+```bash
+php artisan migrate:status
+php artisan route:list
+php artisan optimize:clear
+php artisan storage:link
+```
+
+## Testing Checklist
+
+- Log in using a registered staff account.
+- Confirm that guests cannot access management pages.
+- Create, edit, and archive a product.
+- Upload and display a product image.
+- Create, edit, archive, restore, and delete a customer.
+- Create, edit, and delete a staff account.
+- Upload and display a staff avatar.
+- Record a sale with an optional customer.
+- Confirm that product stock decreases after recording a sale.
+- Try selling more than the available stock and confirm that the sale is rejected.
+- Check sales history and transaction details.
+- Test CSV export and PDF receipt download.
+- Change the logged-in user's password.
+- Confirm that the logged-in user cannot delete their own account.

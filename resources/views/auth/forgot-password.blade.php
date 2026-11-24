@@ -60,34 +60,40 @@
         }
 
         .brand {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 12px;
+            width: fit-content;
             color: white;
+            text-decoration: none;
             font-size: 22px;
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
-        .brand-mark {
-            display: grid;
-            width: 31px;
-            height: 31px;
-            place-items: center;
-            border: 2px solid white;
-            border-radius: 5px;
-            color: var(--yellow);
-            font-size: 16px;
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            color: white;
         }
 
-        .brand-name {
+        .brand-logo svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .brand-text {
             position: relative;
         }
 
-        .brand-name::after {
+        .brand-text::after {
             position: absolute;
-            bottom: -9px;
             left: 0;
+            bottom: -9px;
             width: 39px;
             height: 3px;
             border-radius: 10px;
@@ -287,10 +293,39 @@
     <main class="auth-wrapper">
         <section class="auth-card">
             <aside class="auth-intro">
-                <div class="brand">
-                    <span class="brand-mark">▦</span>
-                    <span class="brand-name">SUKLI POS</span>
-                </div>
+
+                <a href="{{ url('/') }}" class="brand">
+                    <span class="brand-logo" aria-hidden="true">
+                        <svg viewBox="0 0 48 48" role="img">
+                            <path
+                                d="M8 18h32v23H8z"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="3"
+                            />
+                            <path
+                                d="M6 18h36L38 8H10L6 18z"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="3"
+                                stroke-linejoin="round"
+                            />
+                            <path
+                                d="M16 25v16M32 25v16"
+                                stroke="currentColor"
+                                stroke-width="3"
+                            />
+                            <path
+                                d="M15 13h18"
+                                stroke="#f3c341"
+                                stroke-width="3"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                    </span>
+
+                    <span class="brand-text">SUKLI POS</span>
+                </a>
 
                 <div class="intro-content">
                     <p class="intro-label">STORE STAFF ACCESS</p>

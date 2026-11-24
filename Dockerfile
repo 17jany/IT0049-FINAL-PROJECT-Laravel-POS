@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
+    libonig-dev \
     nodejs \
     npm \
     && docker-php-ext-configure gd \
@@ -23,7 +24,8 @@ RUN apt-get update && apt-get install -y \
         zip \
         exif \
         pcntl \
-    && a2enmod rewrite
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

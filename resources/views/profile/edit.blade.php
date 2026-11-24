@@ -14,82 +14,104 @@
     <style>
         .profile-page {
             width: 100%;
+            max-width: 980px;
             margin: 24px auto;
         }
 
         .profile-heading {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
-        .profile-heading .eyebrow {
-            margin-bottom: 8px;
+        .profile-eyebrow {
+            margin: 0 0 7px;
+            color: #1769c2;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
         }
 
         .profile-heading h1 {
-            margin: 0 0 8px;
-            color: #252525;
-            font-size: 30px;
+            margin: 0 0 7px;
+            color: #183247;
+            font-size: 32px;
+            line-height: 1.15;
         }
 
         .profile-heading p:last-child {
             margin: 0;
-            color: #626262;
-            font-size: 15px;
+            color: #657482;
+            font-size: 14px;
         }
 
         .profile-card {
             display: grid;
-            grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.4fr);
+            grid-template-columns: 280px 1fr;
             overflow: hidden;
             background: #ffffff;
-            border: 1px solid #e3e3e3;
+            border: 1px solid #d9e3eb;
             border-radius: 14px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+            box-shadow: 0 5px 16px rgba(48, 77, 102, 0.09);
         }
 
         .profile-identity {
             display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 26px 24px;
+            background: #e3f0f9;
+            border-right: 1px solid #d2e3ef;
+        }
+
+        .profile-identity-top {
+            display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 28px 24px;
-            color: #ffffff;
-            background: #171717;
+            gap: 13px;
         }
 
         .profile-avatar {
-            width: 72px;
-            height: 72px;
-            flex: 0 0 72px;
+            width: 70px;
+            height: 70px;
+            flex: 0 0 70px;
             object-fit: cover;
-            border: 3px solid rgba(255, 255, 255, 0.8);
+            border: 4px solid #ffffff;
             border-radius: 50%;
+            box-shadow: 0 2px 7px rgba(23, 105, 194, 0.18);
         }
 
-        .profile-identity p {
-            margin: 0 0 6px;
-        }
-
-        .profile-identity .profile-label {
-            color: #c7c7c7;
-            font-size: 11px;
-            font-weight: bold;
+        .profile-identity-label {
+            margin: 0 0 5px;
+            color: #1769c2;
+            font-size: 10px;
+            font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .profile-identity h2 {
-            margin: 0 0 5px;
-            font-size: 19px;
-            line-height: 1.3;
+            margin: 0 0 4px;
+            color: #183247;
+            font-size: 18px;
+            line-height: 1.25;
         }
 
-        .profile-identity .profile-username {
-            color: #d0d0d0;
+        .profile-username {
+            margin: 0;
+            color: #657482;
             font-size: 13px;
         }
 
+        .profile-note {
+            margin: 28px 0 0;
+            padding-top: 15px;
+            color: #607789;
+            border-top: 1px solid #c7dce9;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
         .profile-details {
-            padding: 22px 24px;
+            padding: 26px 28px;
         }
 
         .profile-form {
@@ -104,83 +126,132 @@
         }
 
         .profile-field label {
-            color: #333333;
-            font-size: 14px;
-            font-weight: bold;
+            color: #344b5d;
+            font-size: 13px;
+            font-weight: 700;
         }
 
         .profile-field input {
             width: 100%;
-            padding: 10px 12px;
-            color: #252525;
+            padding: 11px 12px;
+            color: #243746;
             background: #ffffff;
-            border: 1px solid #cccccc;
+            border: 1px solid #cbd8e1;
             border-radius: 7px;
             font: inherit;
             font-size: 14px;
         }
 
         .profile-field input:focus {
-            border-color: #555555;
-            outline: 2px solid #dddddd;
+            border-color: #1769c2;
+            outline: 3px solid rgba(23, 105, 194, 0.12);
         }
 
         .profile-field-error {
             margin: 0;
             color: #b42318;
-            font-size: 13px;
+            font-size: 12px;
+        }
+
+        .profile-meta-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 3px;
         }
 
         .profile-meta {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 12px 0;
-            border-top: 1px solid #e9e9e9;
-            color: #626262;
-            font-size: 13px;
+            padding: 12px 13px;
+            background: #f5f9fc;
+            border: 1px solid #e0e9ef;
+            border-radius: 7px;
+        }
+
+        .profile-meta span {
+            display: block;
+            margin-bottom: 5px;
+            color: #71808c;
+            font-size: 11px;
         }
 
         .profile-meta strong {
-            color: #252525;
-            text-align: right;
+            color: #243746;
+            font-size: 13px;
         }
 
         .profile-actions {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             margin-top: 4px;
         }
 
+        .profile-actions-left {
+            display: flex;
+            gap: 9px;
+        }
+
         .profile-save-button,
-        .profile-cancel-link {
+        .profile-cancel-link,
+        .profile-security-link {
             display: inline-block;
             padding: 10px 15px;
             border-radius: 7px;
-            font-size: 14px;
+            font-size: 13px;
             text-decoration: none;
             cursor: pointer;
         }
 
         .profile-save-button {
             color: #ffffff;
-            background: #171717;
-            border: 1px solid #171717;
+            background: #1769c2;
+            border: 1px solid #1769c2;
         }
 
         .profile-save-button:hover {
-            background: #404040;
+            color: #ffffff;
+            background: #1057a4;
         }
 
         .profile-cancel-link {
-            color: #252525;
-            background: #eeeeee;
-            border: 1px solid #dddddd;
+            color: #405466;
+            background: #edf3f7;
+            border: 1px solid #d6e1e8;
         }
 
         .profile-cancel-link:hover {
-            background: #dddddd;
+            color: #243746;
+            background: #e0eaf0;
+        }
+
+        .profile-security-link {
+            color: #735500;
+            background: #fff4c7;
+            border: 1px solid #f0d979;
+        }
+
+        .profile-security-link:hover {
+            color: #624800;
+            background: #ffeaa2;
+        }
+
+        .profile-security {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px 18px;
+            background: #fffdf4;
+            border: 1px solid #f0e2a9;
+            border-radius: 10px;
+        }
+
+        .profile-security p {
+            margin: 0;
+            color: #6d6040;
+            font-size: 13px;
         }
 
         .profile-success {
@@ -190,88 +261,84 @@
             background: #e9f7ef;
             border: 1px solid #b8e3c8;
             border-radius: 7px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        .password-card {
-            display: grid;
-            gap: 14px;
-            margin-top: 18px;
-            padding: 22px 24px;
-            background: #ffffff;
-            border: 1px solid #e3e3e3;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-        }
+        @media (max-width: 700px) {
+            .profile-page {
+                width: 92%;
+            }
 
-        .password-card h2 {
-            margin: -8px 0 0;
-            color: #252525;
-            font-size: 21px;
-        }
-
-        .password-description {
-            margin: -6px 0 4px;
-            color: #626262;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .password-card form {
-            display: grid;
-            gap: 15px;
-        }
-
-        @media (max-width: 650px) {
             .profile-card {
                 grid-template-columns: 1fr;
             }
 
             .profile-identity {
-                padding: 22px 18px;
+                border-right: 0;
+                border-bottom: 1px solid #d2e3ef;
             }
 
             .profile-details {
-                padding: 18px;
+                padding: 22px 18px;
             }
+        }
 
+        @media (max-width: 500px) {
             .profile-heading h1 {
-                font-size: 26px;
+                font-size: 27px;
             }
 
-            .password-card {
-                padding: 18px;
+            .profile-meta-list {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-actions,
+            .profile-security {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .profile-actions-left {
+                width: 100%;
             }
         }
     </style>
 
     <section class="profile-page">
         <header class="profile-heading">
-            <p class="eyebrow">User Profile</p>
+            <p class="profile-eyebrow">User profile</p>
             <h1>My Account</h1>
-            <p>Edit the details for your own POS account.</p>
+            <p>Manage the personal details connected to your POS account.</p>
         </header>
 
         @if (session('status') === 'profile-updated')
-            <p class="profile-success">Your profile was updated successfully.</p>
+            <p class="profile-success">
+                Your profile was updated successfully.
+            </p>
         @endif
 
         <div class="profile-card">
-            <div class="profile-identity">
-                <img
-                    class="profile-avatar"
-                    src="{{ $avatarUrl }}"
-                    alt="{{ $profile->full_name }}'s profile picture"
-                >
+            <aside class="profile-identity">
+                <div class="profile-identity-top">
+                    <img
+                        class="profile-avatar"
+                        src="{{ $avatarUrl }}"
+                        alt="{{ $profile->full_name }}'s profile picture"
+                    >
 
-                <div>
-                    <p class="profile-label">POS Staff Account</p>
-                    <h2>{{ $profile->full_name }}</h2>
-                    <p class="profile-username">
-                        {{ '@' . $profile->username }}
-                    </p>
+                    <div>
+                        <p class="profile-identity-label">POS staff account</p>
+                        <h2>{{ $profile->full_name }}</h2>
+                        <p class="profile-username">
+                            {{ '@' . $profile->username }}
+                        </p>
+                    </div>
                 </div>
-            </div>
+
+                <p class="profile-note">
+                    Keep your account information updated so staff records remain accurate.
+                </p>
+            </aside>
 
             <div class="profile-details">
                 <form
@@ -291,6 +358,7 @@
                             value="{{ old('full_name', $profile->full_name) }}"
                             required
                         >
+
                         @error('full_name')
                             <p class="profile-field-error">{{ $message }}</p>
                         @enderror
@@ -305,6 +373,7 @@
                             value="{{ old('username', $profile->username) }}"
                             required
                         >
+
                         @error('username')
                             <p class="profile-field-error">{{ $message }}</p>
                         @enderror
@@ -318,96 +387,50 @@
                             type="email"
                             value="{{ old('email', $profile->email) }}"
                         >
+
                         @error('email')
                             <p class="profile-field-error">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="profile-meta">
-                        <span>Account created</span>
-                        <strong>
-                            {{ $profile->created_at?->format('F j, Y') ?? 'Not available' }}
-                        </strong>
-                    </div>
+                    <div class="profile-meta-list">
+                        <div class="profile-meta">
+                            <span>Account created</span>
+                            <strong>
+                                {{ $profile->created_at?->format('F j, Y') ?? 'Not available' }}
+                            </strong>
+                        </div>
 
-                    <div class="profile-meta">
-                        <span>Account type</span>
-                        <strong>POS Staff</strong>
+                        <div class="profile-meta">
+                            <span>Account type</span>
+                            <strong>POS Staff</strong>
+                        </div>
                     </div>
 
                     <div class="profile-actions">
-                        <button class="profile-save-button" type="submit">
-                            Save Profile
-                        </button>
+                        <div class="profile-actions-left">
+                            <button class="profile-save-button" type="submit">
+                                Save Profile
+                            </button>
 
-                        <a class="profile-cancel-link" href="{{ route('home') }}">
-                            Cancel
-                        </a>
+                            <a class="profile-cancel-link" href="{{ route('dashboard') }}">
+                                Cancel
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        <section class="password-card">
-            <p class="eyebrow">Account Security</p>
-            <h2>Change Password</h2>
-            <p class="password-description">
-                Enter your current password, then choose and confirm a new password.
-            </p>
+        <div class="profile-security">
+            <p>Need to update your password?</p>
 
-            @if (session('password-updated'))
-                <p class="profile-success">
-                    {{ session('password-updated') }}
-                </p>
-            @endif
-
-            <form method="POST" action="{{ route('profile.password.update') }}">
-                @csrf
-                @method('PATCH')
-
-                <div class="profile-field">
-                    <label for="current_password">Current Password</label>
-                    <input
-                        id="current_password"
-                        name="current_password"
-                        type="password"
-                        autocomplete="current-password"
-                        required
-                    >
-                    @error('current_password')
-                        <p class="profile-field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="profile-field">
-                    <label for="password">New Password</label>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autocomplete="new-password"
-                        required
-                    >
-                    @error('password')
-                        <p class="profile-field-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="profile-field">
-                    <label for="password_confirmation">Confirm New Password</label>
-                    <input
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        type="password"
-                        autocomplete="new-password"
-                        required
-                    >
-                </div>
-
-                <button class="profile-save-button" type="submit">
-                    Update Password
-                </button>
-            </form>
-        </section>
+            <a
+                class="profile-security-link"
+                href="{{ route('profile.password.edit') }}"
+            >
+                Change Password
+            </a>
+        </div>
     </section>
 @endsection

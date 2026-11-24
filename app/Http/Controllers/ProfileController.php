@@ -14,7 +14,7 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Display the profile edit page.
      */
     public function edit(Request $request): View
     {
@@ -55,20 +55,35 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display the separate password-change page.
+     */
+    public function editPassword(Request $request): View
+    {
+        return view('profile.password', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
      * Change the currently signed-in user's password.
      */
     public function updatePassword(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => [
+                'required',
+                'confirmed',
+                Password::defaults(),
+            ],
         ]);
 
         $user = $request->user();
+
         $user->password = Hash::make($validated['password']);
         $user->save();
 
-        return Redirect::route('profile.edit')
+        return Redirect::route('profile.password.edit')
             ->with('password-updated', 'Password updated successfully.');
     }
 

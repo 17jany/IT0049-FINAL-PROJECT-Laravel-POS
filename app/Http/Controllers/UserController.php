@@ -5,20 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
 
 class UserController extends Controller
 {
     public function index(): View
     {
-        return view('users.users', [
-            'users' => User::orderBy('id')->get(),
-        ]);
+        $users = User::latest()->get();
+
+        return view('users.users', compact('users'));
     }
 
     public function create(): View
@@ -40,13 +38,38 @@ class UserController extends Controller
                 'string',
                 'max:100',
             ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:100',
+                'unique:users,email',
+            ],
+            'password' => [
+                'required',
+                'confirmed',
+                'min:8',
+            ],
+            'avatar' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
         ]);
+
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request
+                ->file('avatar')
+                ->store('avatars', 'public');
+        }
+
+        $validated['password'] = Hash::make($validated['password']);
 
         User::create($validated);
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User added successfully.');
+            ->with('success', 'Staff account created successfully.');
     }
 
     public function edit(User $user): View
@@ -54,56 +77,84 @@ class UserController extends Controller
         return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user): RedirectResponse
-    {
+    public function update(
+        Request $request,
+        User $user
+    ): RedirectResponse {
         $validated = $request->validate([
             'username' => [
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('users', 'username')->ignore($user->id),
+                Rule::unique('users', 'username')
+                    ->ignore($user->id),
             ],
             'full_name' => [
                 'required',
                 'string',
                 'max:100',
             ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:100',
+                Rule::unique('users', 'email')
+                    ->ignore($user->id),
+            ],
+            'password' => [
+                'nullable',
+                'confirmed',
+                'min:8',
+            ],
             'avatar' => [
                 'nullable',
                 'image',
+                'mimes:jpg,jpeg,png,webp',
                 'max:2048',
             ],
         ]);
 
-        $avatarFile = $request->file('avatar');
-        unset($validated['avatar']);
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
 
-        if ($avatarFile) {
-            $manager = new ImageManager(new Driver());
+            $validated['avatar'] = $request
+                ->file('avatar')
+                ->store('avatars', 'public');
+        }
 
-            $image = $manager
-                ->read($avatarFile->getRealPath())
-                ->cover(300, 300);
-
-            $avatarPath = 'avatars/' . Str::uuid() . '.jpg';
-
-            Storage::disk('public')->put(
-                $avatarPath,
-                (string) $image->toJpeg(85)
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make(
+                $validated['password']
             );
-
-            $validated['avatar'] = $avatarPath;
+        } else {
+            unset($validated['password']);
         }
 
-        $oldAvatar = $user->avatar;
         $user->update($validated);
-
-        if ($avatarFile && $oldAvatar) {
-            Storage::disk('public')->delete($oldAvatar);
-        }
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User updated successfully.');
+            ->with('success', 'Staff account updated successfully.');
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        if ($user->id === auth()->id()) {
+            return back()->withErrors([
+                'delete' => 'You cannot delete your own account.',
+            ]);
+        }
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Staff account deleted successfully.');
     }
 }

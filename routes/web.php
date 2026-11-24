@@ -8,60 +8,107 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// PUBLIC ROUTES
-Route::get('/', [PageController::class, 'home'])->name('home');
-Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+})->name('home');
 
-// DASHBOARD
+Route::get('/about', [PageController::class, 'about'])
+    ->name('about');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-// AUTHENTICATED ROUTES
 Route::middleware('auth')->group(function () {
 
-    // CUSTOMERS MODULE
-    // Includes Archive Customer
+    /*
+    |--------------------------------------------------------------------------
+    | Customers
+    |--------------------------------------------------------------------------
+    */
+
+    Route::patch('/customers/{customer}/restore', [
+        CustomerController::class,
+        'restore',
+    ])->name('customers.restore');
+
+    Route::delete('/customers/{customer}/permanent', [
+        CustomerController::class,
+        'forceDestroy',
+    ])->name('customers.forceDestroy');
+
     Route::resource('customers', CustomerController::class)
         ->except(['show']);
 
-    // USERS MODULE
-    Route::resource('users', UserController::class)
-        ->except(['show', 'destroy']);
+    /*
+    |--------------------------------------------------------------------------
+    | Staff / Users
+    |--------------------------------------------------------------------------
+    */
 
-    // PRODUCTS MODULE
-    // Includes Archive Product
+    Route::resource('users', UserController::class)
+        ->except(['show']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Products
+    |--------------------------------------------------------------------------
+    */
+
     Route::resource('products', ProductController::class)
         ->except(['show']);
 
-    // SALES MODULE
+    /*
+    |--------------------------------------------------------------------------
+    | Sales
+    |--------------------------------------------------------------------------
+    */
 
-    // Export Sales History to CSV
-    Route::get('/sales/export', [SaleController::class, 'export'])
-        ->name('sales.export');
+    Route::get('/sales/export', [
+        SaleController::class,
+        'export',
+    ])->name('sales.export');
 
-    // Download PDF Receipt
-    Route::get('/sales/{sale}/receipt', [SaleController::class, 'receipt'])
-        ->name('sales.receipt');
+    Route::get('/sales/{sale}/receipt', [
+        SaleController::class,
+        'receipt',
+    ])->name('sales.receipt');
 
-    // Record Sale, Sales History, and Transaction Details
     Route::resource('sales', SaleController::class)
         ->only(['index', 'create', 'store', 'show']);
 
-    // PROFILE ROUTES
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
+    /*
+    |--------------------------------------------------------------------------
+    | Profile
+    |--------------------------------------------------------------------------
+    */
 
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
+    Route::get('/profile', [
+        ProfileController::class,
+        'edit',
+    ])->name('profile.edit');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    Route::patch('/profile', [
+        ProfileController::class,
+        'update',
+    ])->name('profile.update');
 
-    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])
-        ->name('profile.password.update');
+    Route::get('/profile/password', [
+        ProfileController::class,
+        'editPassword',
+    ])->name('profile.password.edit');
+
+    Route::patch('/profile/password', [
+        ProfileController::class,
+        'updatePassword',
+    ])->name('profile.password.update');
+
+    Route::delete('/profile', [
+        ProfileController::class,
+        'destroy',
+    ])->name('profile.destroy');
 });
 
-// AUTHENTICATION ROUTES
 require __DIR__.'/auth.php';
-

@@ -1,81 +1,104 @@
 @extends('layouts.app')
 
-@section('title', 'Customers')
+@section('title', $showArchived ? 'Archived Customers' : 'Customers')
 
 @section('content')
-<section class="customers-page">
+<div class="customers-page">
 
-    <div class="customers-heading">
-        <h1>Customers</h1>
-        <p class="subtitle">
-            Manage your suki, loyalty, and credit customers.
-        </p>
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">CUSTOMER DIRECTORY</p>
+
+            <h1>
+                {{ $showArchived ? 'Archived Customers' : 'Customers' }}
+            </h1>
+
+            <p class="subtitle">
+                Manage customer names, contact details, and store records.
+            </p>
+        </div>
+
+        @if (!$showArchived)
+            <a href="{{ route('customers.create') }}" class="primary-button">
+                + Add Customer
+            </a>
+        @endif
     </div>
 
     @if (session('success'))
-        <p class="success-message">
+        <div class="success-message">
             {{ session('success') }}
-        </p>
-    @endif
-
-    @if (session('error'))
-        <p class="customer-alert" role="alert">
-            {{ session('error') }}
-        </p>
-    @endif
-
-    <div class="customers-panel">
-
-        <div class="customer-toolbar">
-            <form
-                action="{{ route('customers.index') }}"
-                method="GET"
-                class="customer-search">
-
-                <div class="search-field">
-                    <span class="search-icon">⌕</span>
-
-                    <input
-                        type="search"
-                        name="search"
-                        value="{{ $search ?? '' }}"
-                        placeholder="Search customers..."
-                        aria-label="Search customers">
-                </div>
-
-                <button type="submit" class="search-button">
-                    Search
-                </button>
-            </form>
-
-            <a
-                href="{{ route('customers.create') }}"
-                class="add-customer-button">
-                + Add Customer
-            </a>
         </div>
+    @endif
 
-        <div class="customers-table-wrapper">
+    @if ($errors->has('delete'))
+        <div class="error-message">
+            {{ $errors->first('delete') }}
+        </div>
+    @endif
+
+    <div class="customer-tabs">
+        <a
+            href="{{ route('customers.index') }}"
+            class="{{ !$showArchived ? 'active' : '' }}"
+        >
+            Active Customers
+        </a>
+
+        <a
+            href="{{ route('customers.index', ['archived' => 1]) }}"
+            class="{{ $showArchived ? 'active' : '' }}"
+        >
+            Archived Customers
+        </a>
+    </div>
+
+    <div class="customer-card">
+
+        <form method="GET" action="{{ route('customers.index') }}" class="search-form">
+            @if ($showArchived)
+                <input type="hidden" name="archived" value="1">
+            @endif
+
+            <input
+                type="text"
+                name="search"
+                value="{{ $search }}"
+                placeholder="Search by name, phone, or email..."
+            >
+
+            <button type="submit" class="search-button">
+                Search
+            </button>
+        </form>
+
+        <div class="table-wrapper">
             <table class="customers-table">
                 <thead>
                     <tr>
                         <th>Customer</th>
-                        <th>Contact</th>
-                        <th>Type</th>
-                        <th>Credit Limit</th>
-                        <th>Balance</th>
+                        <th>Phone</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @forelse ($customers as $customer)
+                        @php
+                            $initial = strtoupper(
+                                substr($customer->full_name, 0, 1)
+                            );
+
+                            $isSuki = ($customer->sales_count ?? 0) > 0;
+                        @endphp
+
                         <tr>
                             <td>
-                                <div class="customer-identity">
-                                    <span class="customer-avatar">
-                                        &#128100;
-                                    </span>
+                                <div class="customer-profile">
+                                    <div class="initial-avatar">
+                                        {{ $initial }}
+                                    </div>
 
                                     <div>
                                         <strong>
@@ -94,63 +117,83 @@
                             </td>
 
                             <td>
-                                @if ($customer->customer_type === 'credit')
-                                    <span class="customer-badge credit-badge">
-                                        Credit
+                                @if ($showArchived)
+                                    <span class="status archived-status">
+                                        Archived
                                     </span>
-                                @else
-                                    <span class="customer-badge suki-badge">
+                                @elseif ($isSuki)
+                                    <span class="status suki-status">
                                         Suki
                                     </span>
-                                @endif
-                            </td>
-
-                            <td>
-                                @if ($customer->customer_type === 'credit')
-                                    ₱{{ number_format($customer->credit_limit, 2) }}
                                 @else
-                                    —
+                                    <span class="status first-time-status">
+                                        First-time
+                                    </span>
                                 @endif
                             </td>
 
-                            <td>
-                                @if ($customer->customer_type === 'credit')
-                                    ₱{{ number_format($customer->balance, 2) }}
-                                @else
-                                    —
-                                @endif
-                            </td>
+                            <td class="actions">
+                                @if ($showArchived)
+                                    <form
+                                        method="POST"
+                                        action="{{ route('customers.restore', $customer) }}"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
 
-                            <td>
-                                <div class="customer-actions">
-                                    <a
-                                        href="{{ route('customers.edit', $customer) }}"
-                                        class="action-link">
-                                        Edit
-                                    </a>
-
-                                    <span class="action-divider">|</span>
+                                        <button
+                                            type="submit"
+                                            class="restore-button"
+                                        >
+                                            Restore
+                                        </button>
+                                    </form>
 
                                     <form
-                                        action="{{ route('customers.destroy', $customer) }}"
                                         method="POST"
-                                        onsubmit="return confirm('Archive this customer?');">
+                                        action="{{ route('customers.forceDestroy', $customer) }}"
+                                        onsubmit="return confirm('Permanently delete this customer? This cannot be undone.')"
+                                    >
                                         @csrf
                                         @method('DELETE')
 
                                         <button
                                             type="submit"
-                                            class="action-link archive-action">
+                                            class="delete-button"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+                                @else
+                                    <a
+                                        href="{{ route('customers.edit', $customer) }}"
+                                        class="edit-button"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ route('customers.destroy', $customer) }}"
+                                        onsubmit="return confirm('Archive this customer?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button
+                                            type="submit"
+                                            class="archive-button"
+                                        >
                                             Archive
                                         </button>
                                     </form>
-                                </div>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="empty-message">
-                                No customer records found.
+                            <td colspan="4" class="empty-state">
+                                No customers found.
                             </td>
                         </tr>
                     @endforelse
@@ -158,226 +201,275 @@
             </table>
         </div>
 
-        <div class="customer-pagination">
+        <div class="pagination-area">
             {{ $customers->links() }}
         </div>
-
     </div>
-</section>
+</div>
 
 <style>
     .customers-page {
-        width: min(100%, 1200px);
-        margin: 20px auto;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px 60px;
     }
 
-    .customers-heading {
-        margin-bottom: 22px;
-    }
-
-    .customers-heading h1 {
-        font-size: 32px;
-        margin: 0 0 6px;
-    }
-
-    .customers-panel {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 20px;
-    }
-
-    .customer-toolbar {
+    .page-heading {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        align-items: end;
+        gap: 24px;
         margin-bottom: 20px;
     }
 
-    .customer-search {
-        display: flex;
-        align-items: center;
-        flex: 1;
-        gap: 10px;
+    .eyebrow {
+        margin: 0 0 6px;
+        color: #1667b9;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
     }
 
-    .search-field {
-        position: relative;
-        flex: 1;
-        min-width: 0;
+    .page-heading h1 {
+        margin: 0;
+        color: #12304b;
+        font-size: 32px;
     }
 
-    .search-icon {
-        position: absolute;
-        left: 13px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #64748b;
-        font-size: 22px;
+    .subtitle {
+        margin: 7px 0 0;
+        color: #60758a;
     }
 
-    .search-field input {
-        width: 100%;
-        padding: 11px 12px 11px 40px;
-        border: 1px solid #cbd5e1;
-        border-radius: 7px;
-        font: inherit;
-        box-sizing: border-box;
-    }
-
-    .search-button,
-    .add-customer-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #1769c2;
-        color: #ffffff;
-        border: none;
-        border-radius: 6px;
-        padding: 11px 16px;
-        font-size: 13px;
-        font-weight: 600;
+    .primary-button,
+    .search-button {
+        border: 0;
+        border-radius: 8px;
+        background: #176bc1;
+        color: white;
+        font-weight: 700;
         text-decoration: none;
-        white-space: nowrap;
         cursor: pointer;
     }
 
-    .search-button:hover,
-    .add-customer-button:hover {
-        background: #1255a0;
+    .primary-button {
+        padding: 12px 17px;
+        white-space: nowrap;
     }
 
-    .customers-table-wrapper {
-        width: 100%;
+    .success-message,
+    .error-message {
+        margin-bottom: 16px;
+        padding: 12px 15px;
+        border-radius: 8px;
+    }
+
+    .success-message {
+        background: #e8f7ef;
+        border: 1px solid #b9e6cc;
+        color: #216b40;
+    }
+
+    .error-message {
+        background: #fff0f0;
+        border: 1px solid #e6b6b6;
+        color: #9d3030;
+    }
+
+    .customer-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .customer-tabs a {
+        padding: 9px 13px;
+        border: 1px solid #cbddea;
+        border-radius: 7px;
+        background: #f5f9fc;
+        color: #44647d;
+        font-size: 13px;
+        text-decoration: none;
+    }
+
+    .customer-tabs a.active {
+        border-color: #176bc1;
+        background: #176bc1;
+        color: white;
+    }
+
+    .customer-card {
+        overflow: hidden;
+        padding: 18px;
+        border: 1px solid #d7e2eb;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 8px 22px rgba(37, 70, 95, 0.08);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 9px;
+        margin-bottom: 22px;
+    }
+
+    .search-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 11px 13px;
+        border: 1px solid #bfd2e1;
+        border-radius: 7px;
+        color: #19344d;
+        font-size: 14px;
+    }
+
+    .search-button {
+        padding: 0 17px;
+    }
+
+    .table-wrapper {
         overflow-x: auto;
     }
 
     .customers-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 13px;
-    }
-
-    .customers-table th,
-    .customers-table td {
-        padding: 13px 12px;
-        text-align: left;
-        border-bottom: 1px solid #e2e8f0;
-        vertical-align: middle;
+        color: #18344d;
+        font-size: 14px;
     }
 
     .customers-table th {
-        background: #edf2f7;
-        color: #475569;
-        font-weight: 600;
-        white-space: nowrap;
+        padding: 12px 13px;
+        background: #edf5fa;
+        color: #45647a;
+        font-size: 11px;
+        letter-spacing: 1px;
+        text-align: left;
+        text-transform: uppercase;
     }
 
-    .customer-identity {
+    .customers-table td {
+        padding: 13px;
+        border-bottom: 1px solid #e1eaf0;
+        vertical-align: middle;
+    }
+
+    .customer-profile {
         display: flex;
         align-items: center;
-        gap: 10px;
-        min-width: 160px;
+        gap: 11px;
     }
 
-    .customer-identity strong,
-    .customer-identity small {
+    .customer-profile strong {
         display: block;
+        color: #17344f;
     }
 
-    .customer-identity small {
-        margin-top: 4px;
-        color: #64748b;
-        font-size: 11px;
+    .customer-profile small {
+        display: block;
+        margin-top: 3px;
+        color: #6d8294;
+        font-size: 12px;
     }
 
-    .customer-avatar {
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f1f5f9;
+    .initial-avatar {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border: 1px solid #c9dfef;
         border-radius: 50%;
-        font-size: 17px;
-        flex-shrink: 0;
+        background: #e7f3fb;
+        color: #176bc1;
+        font-weight: 700;
     }
 
-    .customer-badge {
+    .status {
         display: inline-block;
-        padding: 5px 12px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        white-space: nowrap;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
     }
 
-    .suki-badge {
-        background: #dbeafe;
-        color: #1d4ed8;
+    .suki-status {
+        background: #e5f7ee;
+        color: #26724d;
     }
 
-    .credit-badge {
-        background: #ede9fe;
-        color: #6d28d9;
+    .first-time-status {
+        background: #e8f3fb;
+        color: #39749f;
     }
 
-    .customer-actions {
+    .archived-status {
+        background: #fff1d8;
+        color: #8a6500;
+    }
+
+    .actions {
         display: flex;
-        align-items: center;
-        gap: 8px;
+        gap: 7px;
         white-space: nowrap;
     }
 
-    .customer-actions form {
+    .actions form {
+        display: inline;
         margin: 0;
     }
 
-    .action-link {
-        color: #1769c2;
-        background: none;
-        border: none;
-        padding: 0;
-        font: inherit;
+    .edit-button,
+    .restore-button,
+    .archive-button,
+    .delete-button {
+        padding: 7px 10px;
+        border-radius: 6px;
         font-size: 12px;
-        font-weight: 600;
-        text-decoration: underline;
         cursor: pointer;
+        text-decoration: none;
     }
 
-    .action-divider {
-        color: #94a3b8;
+    .edit-button,
+    .restore-button {
+        border: 1px solid #b8d9f3;
+        background: #edf7ff;
+        color: #1264af;
     }
 
-    .customer-pagination {
-        margin-top: 20px;
+    .archive-button {
+        border: 1px solid #edcc75;
+        background: #fff8e4;
+        color: #8b6500;
     }
 
-    .customer-alert {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 12px;
-        border-radius: 7px;
-        margin-bottom: 18px;
+    .delete-button {
+        border: 1px solid #e3b1b1;
+        background: #fff1f1;
+        color: #a02c2c;
+    }
+
+    .empty-state {
+        padding: 35px !important;
+        color: #71879a;
+        text-align: center;
+    }
+
+    .pagination-area {
+        margin-top: 18px;
     }
 
     @media (max-width: 700px) {
-        .customer-toolbar {
-            align-items: stretch;
+        .page-heading {
+            align-items: flex-start;
             flex-direction: column;
         }
 
-        .customer-search {
-            width: 100%;
+        .search-form {
+            flex-direction: column;
         }
 
-        .add-customer-button {
-            align-self: flex-start;
-        }
-
-        .customers-panel {
-            padding: 14px;
+        .search-button {
+            min-height: 40px;
         }
     }
 </style>

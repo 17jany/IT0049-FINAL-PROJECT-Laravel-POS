@@ -10,34 +10,37 @@ use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
-    // Display and search active customers
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search', ''));
+        $showArchived = $request->boolean('archived');
 
         $customers = Customer::query()
-            ->where('is_archived', false)
+            ->where('is_archived', $showArchived)
+            ->withCount('sales')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('full_name', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             })
             ->orderBy('full_name')
             ->paginate(10)
             ->withQueryString();
 
-        return view('customers', compact('customers', 'search'));
+        return view('customers', compact(
+            'customers',
+            'search',
+            'showArchived'
+        ));
     }
 
-    // Show add customer form
     public function create(): View
     {
         return view('customers.create');
     }
 
-    // Save new customer
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -45,16 +48,19 @@ class CustomerController extends Controller
             'email' => ['required', 'email', 'max:100'],
             'phone' => ['nullable', 'string', 'max:20'],
             'customer_type' => ['required', Rule::in(['suki', 'credit'])],
-            'credit_limit' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
+            'credit_limit' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:9999999999.99',
+            ],
         ]);
 
         if ($validated['customer_type'] === 'suki') {
             $validated['credit_limit'] = 0;
         }
 
-        $validated['credit_limit'] =
-            $validated['credit_limit'] ?? 0;
-
+        $validated['credit_limit'] = $validated['credit_limit'] ?? 0;
         $validated['balance'] = 0;
         $validated['is_archived'] = false;
 
@@ -65,7 +71,6 @@ class CustomerController extends Controller
             ->with('success', 'Customer added successfully.');
     }
 
-    // Show edit customer form
     public function edit(Customer $customer): View
     {
         abort_if($customer->is_archived, 404);
@@ -73,12 +78,10 @@ class CustomerController extends Controller
         return view('customers.edit', compact('customer'));
     }
 
-    // Update customer information
     public function update(
         Request $request,
         Customer $customer
     ): RedirectResponse {
-
         abort_if($customer->is_archived, 404);
 
         $validated = $request->validate([
@@ -86,7 +89,12 @@ class CustomerController extends Controller
             'email' => ['required', 'email', 'max:100'],
             'phone' => ['nullable', 'string', 'max:20'],
             'customer_type' => ['required', Rule::in(['suki', 'credit'])],
-            'credit_limit' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
+            'credit_limit' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:9999999999.99',
+            ],
         ]);
 
         if ($validated['customer_type'] === 'suki') {
@@ -102,12 +110,12 @@ class CustomerController extends Controller
             $validated['credit_limit'] = 0;
         }
 
-        $validated['credit_limit'] =
-            $validated['credit_limit'] ?? 0;
+        $validated['credit_limit'] = $validated['credit_limit'] ?? 0;
 
         if (
             $validated['customer_type'] === 'credit' &&
-            (float) $validated['credit_limit'] < (float) $customer->balance
+            (float) $validated['credit_limit'] <
+            (float) $customer->balance
         ) {
             return back()
                 ->withErrors([
@@ -124,7 +132,6 @@ class CustomerController extends Controller
             ->with('success', 'Customer updated successfully.');
     }
 
-    // Archive customer without deleting sales history
     public function destroy(Customer $customer): RedirectResponse
     {
         $customer->update([
@@ -134,5 +141,32 @@ class CustomerController extends Controller
         return redirect()
             ->route('customers.index')
             ->with('success', 'Customer archived successfully.');
+    }
+
+    public function restore(Customer $customer): RedirectResponse
+    {
+        $customer->update([
+            'is_archived' => false,
+        ]);
+
+        return redirect()
+            ->route('customers.index', ['archived' => 1])
+            ->with('success', 'Customer restored successfully.');
+    }
+
+    public function forceDestroy(Customer $customer): RedirectResponse
+    {
+        if ($customer->sales()->exists()) {
+            return back()->withErrors([
+                'delete' =>
+                    'This customer cannot be deleted because they have sales history.',
+            ]);
+        }
+
+        $customer->delete();
+
+        return redirect()
+            ->route('customers.index', ['archived' => 1])
+            ->with('success', 'Customer permanently deleted.');
     }
 }
